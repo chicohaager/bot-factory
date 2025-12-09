@@ -684,6 +684,14 @@ TELEGRAM_CHAT_ID={t.get('chatId', '')}
         if out.get('slack', {}).get('enabled'):
             env += f"\nSLACK_ENABLED=true\nSLACK_WEBHOOK_URL={out['slack'].get('webhookUrl', '')}\n"
 
+        if out.get('pushover', {}).get('enabled'):
+            p = out['pushover']
+            env += f'''
+PUSHOVER_ENABLED=true
+PUSHOVER_USER_KEY={p.get('userKey', '')}
+PUSHOVER_API_TOKEN={p.get('apiToken', '')}
+'''
+
         # Professional options
         env += f'''
 # Professional Options
@@ -1552,6 +1560,38 @@ def send_email(subject: str, body: str) -> bool:
 
 '''
 
+        # Output: Pushover
+        if out.get('pushover', {}).get('enabled'):
+            code += '''
+# ==================================================
+# Output: Pushover
+# ==================================================
+
+PUSHOVER_USER_KEY = os.getenv('PUSHOVER_USER_KEY', '')
+PUSHOVER_API_TOKEN = os.getenv('PUSHOVER_API_TOKEN', '')
+
+def send_pushover(message: str, title: str = None) -> bool:
+    """Send message via Pushover"""
+    if not PUSHOVER_USER_KEY or not PUSHOVER_API_TOKEN:
+        logger.warning("Pushover not configured")
+        return False
+
+    try:
+        resp = requests.post("https://api.pushover.net/1/messages.json", data={
+            'token': PUSHOVER_API_TOKEN,
+            'user': PUSHOVER_USER_KEY,
+            'message': message[:1024],
+            'title': title or BOT_NAME,
+        }, timeout=REQUEST_TIMEOUT)
+        resp.raise_for_status()
+        logger.info("Pushover message sent")
+        return True
+    except Exception as e:
+        logger.error(f"Pushover error: {e}")
+        return False
+
+'''
+
         # Build collect_data function
         collectors = []
         if ds.get('rss', {}).get('enabled'):
@@ -1579,6 +1619,8 @@ def send_email(subject: str, body: str) -> bool:
             outputs.append('send_slack(message)')
         if out.get('email', {}).get('enabled'):
             outputs.append(f'send_email("{bot_name} Report", message)')
+        if out.get('pushover', {}).get('enabled'):
+            outputs.append('send_pushover(message)')
 
         send_code = '\n    '.join(outputs) if outputs else '# No outputs configured'
 
@@ -1902,6 +1944,67 @@ def api_delete_bot(name):
     return jsonify({'error': 'Bot not found'}), 404
 
 
+@app.route('/api/tasks/<task_name>', methods=['DELETE'])
+@require_auth
+def api_delete_task(task_name):
+    """Delete a deployed task completely (script + task entry + runs)"""
+    if not validate_bot_name(task_name):
+        return jsonify({'error': 'Invalid task name'}), 400
+
+    deleted_items = []
+
+    try:
+        # 1. Remove from scheduler
+        job_id = f"task_{task_name}"
+        if task_manager.scheduler.get_job(job_id):
+            task_manager.scheduler.remove_job(job_id)
+            deleted_items.append('scheduler')
+
+        # 2. Remove from tasks.yaml
+        if os.path.exists(CONFIG_PATH):
+            with open(CONFIG_PATH, 'r') as f:
+                tasks_config = yaml.safe_load(f) or {'tasks': []}
+
+            original_count = len(tasks_config.get('tasks', []))
+            tasks_config['tasks'] = [t for t in tasks_config.get('tasks', []) if t.get('name') != task_name]
+
+            if len(tasks_config['tasks']) < original_count:
+                with open(CONFIG_PATH, 'w') as f:
+                    yaml.dump(tasks_config, f, default_flow_style=False)
+                deleted_items.append('config')
+
+        # 3. Delete script file
+        script_path = os.path.join(BOTS_PATH, f'{task_name}.py')
+        if os.path.exists(script_path):
+            # Security: Verify path is within BOTS_PATH
+            if os.path.abspath(script_path).startswith(os.path.abspath(BOTS_PATH)):
+                os.remove(script_path)
+                deleted_items.append('script')
+
+        # 4. Clear run history for this task
+        db.clear_runs(task_name)
+        deleted_items.append('runs')
+
+        # 5. Remove from task manager's in-memory tasks
+        if task_name in task_manager.tasks:
+            del task_manager.tasks[task_name]
+            deleted_items.append('memory')
+
+        if not deleted_items:
+            return jsonify({'error': 'Task not found'}), 404
+
+        logger.info(f"Deleted task {task_name}: {', '.join(deleted_items)}")
+        return jsonify({
+            'status': 'ok',
+            'message': f'Task {task_name} deleted',
+            'deleted': deleted_items
+        })
+
+    except Exception as e:
+        logger.exception(f"Error deleting task {task_name}")
+        return jsonify({'error': str(e)}), 500
+
+
 @app.route('/api/bots/generate', methods=['POST'])
 @require_auth
 def api_generate_bot():
@@ -2072,6 +2175,12 @@ def api_deploy_bot():
         if out.get('slack', {}).get('enabled'):
             env_vars['SLACK_ENABLED'] = 'true'
             env_vars['SLACK_WEBHOOK_URL'] = out['slack'].get('webhookUrl', '')
+
+        if out.get('pushover', {}).get('enabled'):
+            p = out['pushover']
+            env_vars['PUSHOVER_ENABLED'] = 'true'
+            env_vars['PUSHOVER_USER_KEY'] = p.get('userKey', '')
+            env_vars['PUSHOVER_API_TOKEN'] = p.get('apiToken', '')
 
         if env_vars:
             task_entry['env'] = env_vars

@@ -38,9 +38,10 @@ const botTemplates = [
       processing: { aiRewrite: false, aiProvider: 'anthropic', aiApiKey: '', deduplication: false },
       outputs: {
         email: { enabled: false, smtp: '', port: 465, user: '', pass: '', from: '', to: '' },
-        telegram: { enabled: true, botToken: '', chatId: '' },
-        discord: { enabled: true, webhookUrl: '' },
-        slack: { enabled: false, webhookUrl: '' }
+        telegram: { enabled: false, botToken: '', chatId: '' },
+        discord: { enabled: false, webhookUrl: '' },
+        slack: { enabled: false, webhookUrl: '' },
+        pushover: { enabled: false, userKey: '', apiToken: '' }
       },
       schedule: { type: 'interval', time: '08:00', timezone: 'Europe/Berlin', interval: 60, cron: '' },
       professional: {
@@ -80,10 +81,11 @@ const botTemplates = [
       },
       processing: { aiRewrite: false, aiProvider: 'anthropic', aiApiKey: '', deduplication: true },
       outputs: {
-        email: { enabled: true, smtp: '', port: 465, user: '', pass: '', from: '', to: '' },
-        telegram: { enabled: true, botToken: '', chatId: '' },
+        email: { enabled: false, smtp: '', port: 465, user: '', pass: '', from: '', to: '' },
+        telegram: { enabled: false, botToken: '', chatId: '' },
         discord: { enabled: false, webhookUrl: '' },
-        slack: { enabled: false, webhookUrl: '' }
+        slack: { enabled: false, webhookUrl: '' },
+        pushover: { enabled: false, userKey: '', apiToken: '' }
       },
       schedule: { type: 'daily', time: '20:00', timezone: 'Europe/Berlin', interval: 60, cron: '' },
       professional: {
@@ -114,10 +116,11 @@ const botTemplates = [
       },
       processing: { aiRewrite: true, aiProvider: 'anthropic', aiApiKey: '', deduplication: true },
       outputs: {
-        email: { enabled: true, smtp: '', port: 465, user: '', pass: '', from: '', to: '' },
+        email: { enabled: false, smtp: '', port: 465, user: '', pass: '', from: '', to: '' },
         telegram: { enabled: false, botToken: '', chatId: '' },
         discord: { enabled: false, webhookUrl: '' },
-        slack: { enabled: false, webhookUrl: '' }
+        slack: { enabled: false, webhookUrl: '' },
+        pushover: { enabled: false, userKey: '', apiToken: '' }
       },
       schedule: { type: 'daily', time: '07:00', timezone: 'Europe/Berlin', interval: 60, cron: '' },
       professional: {
@@ -149,9 +152,10 @@ const botTemplates = [
       processing: { aiRewrite: false, aiProvider: 'anthropic', aiApiKey: '', deduplication: true },
       outputs: {
         email: { enabled: false, smtp: '', port: 465, user: '', pass: '', from: '', to: '' },
-        telegram: { enabled: true, botToken: '', chatId: '' },
+        telegram: { enabled: false, botToken: '', chatId: '' },
         discord: { enabled: false, webhookUrl: '' },
-        slack: { enabled: false, webhookUrl: '' }
+        slack: { enabled: false, webhookUrl: '' },
+        pushover: { enabled: false, userKey: '', apiToken: '' }
       },
       schedule: { type: 'interval', time: '09:00', timezone: 'Europe/Berlin', interval: 30, cron: '' },
       professional: {
@@ -184,8 +188,9 @@ const botTemplates = [
       outputs: {
         email: { enabled: false, smtp: '', port: 465, user: '', pass: '', from: '', to: '' },
         telegram: { enabled: false, botToken: '', chatId: '' },
-        discord: { enabled: true, webhookUrl: '' },
-        slack: { enabled: true, webhookUrl: '' }
+        discord: { enabled: false, webhookUrl: '' },
+        slack: { enabled: false, webhookUrl: '' },
+        pushover: { enabled: false, userKey: '', apiToken: '' }
       },
       schedule: { type: 'interval', time: '08:00', timezone: 'Europe/Berlin', interval: 60, cron: '' },
       professional: {
@@ -222,9 +227,10 @@ const botTemplates = [
       processing: { aiRewrite: false, aiProvider: 'anthropic', aiApiKey: '', deduplication: false },
       outputs: {
         email: { enabled: false, smtp: '', port: 465, user: '', pass: '', from: '', to: '' },
-        telegram: { enabled: true, botToken: '', chatId: '' },
-        discord: { enabled: true, webhookUrl: '' },
-        slack: { enabled: false, webhookUrl: '' }
+        telegram: { enabled: false, botToken: '', chatId: '' },
+        discord: { enabled: false, webhookUrl: '' },
+        slack: { enabled: false, webhookUrl: '' },
+        pushover: { enabled: false, userKey: '', apiToken: '' }
       },
       schedule: { type: 'interval', time: '08:00', timezone: 'Europe/Berlin', interval: 5, cron: '' },
       professional: {
@@ -256,9 +262,10 @@ const botTemplates = [
       processing: { aiRewrite: false, aiProvider: 'anthropic', aiApiKey: '', deduplication: false },
       outputs: {
         email: { enabled: false, smtp: '', port: 465, user: '', pass: '', from: '', to: '' },
-        telegram: { enabled: true, botToken: '', chatId: '' },
+        telegram: { enabled: false, botToken: '', chatId: '' },
         discord: { enabled: false, webhookUrl: '' },
-        slack: { enabled: false, webhookUrl: '' }
+        slack: { enabled: false, webhookUrl: '' },
+        pushover: { enabled: false, userKey: '', apiToken: '' }
       },
       schedule: { type: 'daily', time: '07:00', timezone: 'Europe/Berlin', interval: 60, cron: '' },
       professional: {
@@ -292,7 +299,8 @@ const botTemplates = [
         email: { enabled: false, smtp: '', port: 465, user: '', pass: '', from: '', to: '' },
         telegram: { enabled: true, botToken: '', chatId: '' },
         discord: { enabled: false, webhookUrl: '' },
-        slack: { enabled: false, webhookUrl: '' }
+        slack: { enabled: false, webhookUrl: '' },
+        pushover: { enabled: false, userKey: '', apiToken: '' }
       },
       schedule: { type: 'interval', time: '08:00', timezone: 'Europe/Berlin', interval: 15, cron: '' },
       professional: {
@@ -331,7 +339,8 @@ const botTemplates = [
         email: { enabled: true, smtp: '', port: 465, user: '', pass: '', from: '', to: '' },
         telegram: { enabled: true, botToken: '', chatId: '' },
         discord: { enabled: false, webhookUrl: '' },
-        slack: { enabled: false, webhookUrl: '' }
+        slack: { enabled: false, webhookUrl: '' },
+        pushover: { enabled: false, userKey: '', apiToken: '' }
       },
       schedule: { type: 'daily', time: '06:00', timezone: 'Europe/Berlin', interval: 60, cron: '' },
       professional: {
@@ -370,7 +379,8 @@ const botTemplates = [
         email: { enabled: true, smtp: '', port: 465, user: '', pass: '', from: '', to: '' },
         telegram: { enabled: true, botToken: '', chatId: '' },
         discord: { enabled: false, webhookUrl: '' },
-        slack: { enabled: false, webhookUrl: '' }
+        slack: { enabled: false, webhookUrl: '' },
+        pushover: { enabled: false, userKey: '', apiToken: '' }
       },
       schedule: { type: 'daily', time: '08:00', timezone: 'Europe/Berlin', interval: 60, cron: '' },
       professional: {
@@ -410,7 +420,8 @@ const botTemplates = [
         email: { enabled: false, smtp: '', port: 465, user: '', pass: '', from: '', to: '' },
         telegram: { enabled: true, botToken: '', chatId: '' },
         discord: { enabled: true, webhookUrl: '' },
-        slack: { enabled: false, webhookUrl: '' }
+        slack: { enabled: false, webhookUrl: '' },
+        pushover: { enabled: false, userKey: '', apiToken: '' }
       },
       schedule: { type: 'interval', time: '08:00', timezone: 'Europe/Berlin', interval: 30, cron: '' },
       professional: {
@@ -449,7 +460,8 @@ const botTemplates = [
         email: { enabled: false, smtp: '', port: 465, user: '', pass: '', from: '', to: '' },
         telegram: { enabled: true, botToken: '', chatId: '' },
         discord: { enabled: false, webhookUrl: '' },
-        slack: { enabled: false, webhookUrl: '' }
+        slack: { enabled: false, webhookUrl: '' },
+        pushover: { enabled: false, userKey: '', apiToken: '' }
       },
       schedule: { type: 'daily', time: '08:00', timezone: 'Europe/Berlin', interval: 60, cron: '' },
       professional: {
@@ -488,7 +500,8 @@ const botTemplates = [
         email: { enabled: false, smtp: '', port: 465, user: '', pass: '', from: '', to: '' },
         telegram: { enabled: true, botToken: '', chatId: '' },
         discord: { enabled: false, webhookUrl: '' },
-        slack: { enabled: false, webhookUrl: '' }
+        slack: { enabled: false, webhookUrl: '' },
+        pushover: { enabled: false, userKey: '', apiToken: '' }
       },
       schedule: { type: 'interval', time: '08:00', timezone: 'Europe/Berlin', interval: 5, cron: '' },
       professional: {
@@ -526,9 +539,10 @@ const botTemplates = [
       processing: { aiRewrite: false, aiProvider: 'anthropic', aiApiKey: '', deduplication: false },
       outputs: {
         email: { enabled: false, smtp: '', port: 465, user: '', pass: '', from: '', to: '' },
-        telegram: { enabled: true, botToken: '', chatId: '' },
-        discord: { enabled: true, webhookUrl: '' },
-        slack: { enabled: true, webhookUrl: '' }
+        telegram: { enabled: false, botToken: '', chatId: '' },
+        discord: { enabled: false, webhookUrl: '' },
+        slack: { enabled: false, webhookUrl: '' },
+        pushover: { enabled: false, userKey: '', apiToken: '' }
       },
       schedule: { type: 'interval', time: '08:00', timezone: 'Europe/Berlin', interval: 1, cron: '' },
       professional: {
@@ -697,6 +711,22 @@ function TaskManager() {
     fetchStatus();
   };
 
+  const deleteTask = async (taskName) => {
+    if (!confirm(`Are you sure you want to permanently delete the bot "${taskName}"?\n\nThis will remove:\n- The bot script\n- The scheduled task\n- All run history`)) return;
+    try {
+      const res = await fetch(`/api/tasks/${taskName}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.status === 'ok') {
+        fetchStatus();
+        fetchRuns();
+      } else {
+        alert(`Error: ${data.error}`);
+      }
+    } catch (e) {
+      alert(`Error: ${e.message}`);
+    }
+  };
+
   const reloadConfig = async () => {
     await fetch('/api/tasks/reload', { method: 'POST' });
     fetchStatus();
@@ -790,14 +820,24 @@ function TaskManager() {
 
               <div className="flex justify-between items-center">
                 <StatusBadge status={task.last_status} running={task.running} />
-                <button
-                  onClick={() => runTask(task.name)}
-                  disabled={task.running}
-                  className="flex items-center gap-1 px-3 py-1.5 bg-green-500 text-white text-sm rounded-lg hover:bg-green-600 disabled:opacity-50"
-                >
-                  <Play size={14} />
-                  {task.running ? 'Running...' : 'Run Now'}
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => runTask(task.name)}
+                    disabled={task.running}
+                    className="flex items-center gap-1 px-3 py-1.5 bg-green-500 text-white text-sm rounded-lg hover:bg-green-600 disabled:opacity-50"
+                  >
+                    <Play size={14} />
+                    {task.running ? 'Running...' : 'Run Now'}
+                  </button>
+                  <button
+                    onClick={() => deleteTask(task.name)}
+                    disabled={task.running}
+                    className="flex items-center gap-1 px-2 py-1.5 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 disabled:opacity-50"
+                    title="Delete bot permanently"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
               </div>
 
               {task.next_run && (
@@ -926,7 +966,8 @@ function BotFactory({ onDeploy }) {
       email: { enabled: false, smtp: '', port: 465, user: '', pass: '', from: '', to: '' },
       telegram: { enabled: false, botToken: '', chatId: '' },
       discord: { enabled: false, webhookUrl: '' },
-      slack: { enabled: false, webhookUrl: '' }
+      slack: { enabled: false, webhookUrl: '' },
+      pushover: { enabled: false, userKey: '', apiToken: '' }
     },
     schedule: {
       type: 'daily',
@@ -1340,6 +1381,14 @@ function BotFactory({ onDeploy }) {
             {config.outputs.slack.enabled && (
               <div className={`ml-4 mb-4 p-4 rounded-lg ${dark ? 'bg-gray-700' : 'bg-gray-50'}`}>
                 <Input label="Webhook URL" value={config.outputs.slack.webhookUrl} onChange={(v) => updateConfig('outputs.slack.webhookUrl', v)} />
+              </div>
+            )}
+
+            <Toggle label="Pushover" checked={config.outputs.pushover?.enabled} onChange={(v) => updateConfig('outputs.pushover.enabled', v)} />
+            {config.outputs.pushover?.enabled && (
+              <div className={`ml-4 mb-4 p-4 rounded-lg ${dark ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                <Input label="User Key" value={config.outputs.pushover?.userKey || ''} onChange={(v) => updateConfig('outputs.pushover.userKey', v)} />
+                <Input label="API Token" value={config.outputs.pushover?.apiToken || ''} onChange={(v) => updateConfig('outputs.pushover.apiToken', v)} />
               </div>
             )}
           </div>
