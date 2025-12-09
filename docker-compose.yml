@@ -28,4 +28,4 @@ services:
 networks:
   default:
     name: bot-network
-    driver: bridge
+    external: true
