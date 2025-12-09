@@ -708,6 +708,12 @@ function TaskManager() {
     setSelectedRun(await res.json());
   };
 
+  const deleteRun = async (runId) => {
+    if (!confirm('Are you sure you want to delete this run?')) return;
+    await fetch(`/api/runs/${runId}`, { method: 'DELETE' });
+    fetchStatus();
+  };
+
   const formatDate = (iso) => {
     if (!iso) return '-';
     return new Date(iso).toLocaleString('en-GB', {
@@ -828,9 +834,12 @@ function TaskManager() {
                   <td className={`px-4 py-3 font-mono ${dark ? 'text-gray-400' : 'text-gray-500'}`}>
                     {run.duration_seconds ? `${run.duration_seconds.toFixed(1)}s` : '-'}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3 flex gap-2">
                     <button onClick={() => viewRunDetail(run.id)} className="text-blue-600 hover:underline">
                       Details
+                    </button>
+                    <button onClick={() => deleteRun(run.id)} className="text-red-600 hover:underline">
+                      Delete
                     </button>
                   </td>
                 </tr>

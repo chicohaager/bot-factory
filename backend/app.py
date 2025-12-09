@@ -202,6 +202,19 @@ class Database:
             row = conn.execute('SELECT * FROM runs WHERE id = ?', (run_id,)).fetchone()
             return dict(row) if row else None
 
+    def delete_run(self, run_id: int) -> bool:
+        with self._get_conn() as conn:
+            cursor = conn.execute('DELETE FROM runs WHERE id = ?', (run_id,))
+            return cursor.rowcount > 0
+
+    def clear_runs(self, task_name: str = None) -> int:
+        with self._get_conn() as conn:
+            if task_name:
+                cursor = conn.execute('DELETE FROM runs WHERE task_name = ?', (task_name,))
+            else:
+                cursor = conn.execute('DELETE FROM runs')
+            return cursor.rowcount
+
     def get_stats(self) -> Dict:
         with self._get_conn() as conn:
             total = conn.execute('SELECT COUNT(*) FROM runs').fetchone()[0]
@@ -1678,6 +1691,22 @@ def api_run_detail(run_id):
     if run:
         return jsonify(run)
     return jsonify({'error': 'Run not found'}), 404
+
+
+@app.route('/api/runs/<int:run_id>', methods=['DELETE'])
+@require_auth
+def api_delete_run(run_id):
+    if db.delete_run(run_id):
+        return jsonify({'success': True})
+    return jsonify({'error': 'Run not found'}), 404
+
+
+@app.route('/api/runs', methods=['DELETE'])
+@require_auth
+def api_clear_runs():
+    task_name = request.args.get('task')
+    count = db.clear_runs(task_name)
+    return jsonify({'success': True, 'deleted': count})
 
 
 # --------------------------------------------------
