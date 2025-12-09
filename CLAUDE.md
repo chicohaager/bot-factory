@@ -1,0 +1,1 @@
+- 3d63b7cdc008   ghcr.io/chicohaager/bot-factory:latest                           "python app.py"          8 minutes ago   Up 8 minutes (healthy)   0.0.0.0:5050->5000/tcp, [::]:5050->5000/tcp                                                                                                                                        bot-factory

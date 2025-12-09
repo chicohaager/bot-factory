@@ -2012,6 +2012,70 @@ def api_deploy_bot():
             time_parts = schedule.get('time', '08:00').split(':')
             task_entry['schedule'] = f"{time_parts[1] if len(time_parts) > 1 else '0'} {time_parts[0]} * * *"
 
+        # Build environment variables for the task
+        env_vars = {}
+        ds = config.get('dataSources', {})
+        proc = config.get('processing', {})
+        out = config.get('outputs', {})
+
+        # AI Provider
+        if proc.get('aiEnabled'):
+            env_vars['AI_PROVIDER'] = proc.get('aiProvider', 'anthropic')
+            provider = proc.get('aiProvider', 'anthropic')
+            if provider == 'anthropic':
+                env_vars['ANTHROPIC_API_KEY'] = proc.get('aiApiKey', '')
+            elif provider == 'openai':
+                env_vars['OPENAI_API_KEY'] = proc.get('aiApiKey', '')
+            elif provider == 'google':
+                env_vars['GOOGLE_API_KEY'] = proc.get('aiApiKey', '')
+            elif provider == 'ollama':
+                env_vars['OLLAMA_URL'] = proc.get('ollamaUrl', 'http://localhost:11434')
+                env_vars['OLLAMA_MODEL'] = proc.get('ollamaModel', 'llama2')
+
+        # Data sources
+        if ds.get('weather', {}).get('enabled'):
+            env_vars['OPENWEATHER_API_KEY'] = ds['weather'].get('apiKey', '')
+            env_vars['WEATHER_LOCATION'] = ds['weather'].get('location', 'Berlin,DE')
+
+        if ds.get('homeassistant', {}).get('enabled'):
+            ha = ds['homeassistant']
+            env_vars['HOMEASSISTANT_URL'] = ha.get('url', '')
+            env_vars['HOMEASSISTANT_TOKEN'] = ha.get('token', '')
+
+        if ds.get('zimaos', {}).get('enabled'):
+            zima = ds['zimaos']
+            env_vars['ZIMAOS_URL'] = zima.get('url', 'http://172.17.0.1')
+            env_vars['ZIMAOS_USER'] = zima.get('username', '')
+            env_vars['ZIMAOS_PASS'] = zima.get('password', '')
+
+        # Outputs
+        if out.get('email', {}).get('enabled'):
+            e = out['email']
+            env_vars['EMAIL_ENABLED'] = 'true'
+            env_vars['SMTP_SERVER'] = e.get('smtp', '')
+            env_vars['SMTP_PORT'] = str(e.get('port', 465))
+            env_vars['SMTP_USERNAME'] = e.get('user', '')
+            env_vars['SMTP_PASSWORD'] = e.get('pass', '')
+            env_vars['EMAIL_FROM'] = e.get('from', '')
+            env_vars['EMAIL_TO'] = e.get('to', '')
+
+        if out.get('telegram', {}).get('enabled'):
+            t = out['telegram']
+            env_vars['TELEGRAM_ENABLED'] = 'true'
+            env_vars['TELEGRAM_BOT_TOKEN'] = t.get('botToken', '')
+            env_vars['TELEGRAM_CHAT_ID'] = t.get('chatId', '')
+
+        if out.get('discord', {}).get('enabled'):
+            env_vars['DISCORD_ENABLED'] = 'true'
+            env_vars['DISCORD_WEBHOOK_URL'] = out['discord'].get('webhookUrl', '')
+
+        if out.get('slack', {}).get('enabled'):
+            env_vars['SLACK_ENABLED'] = 'true'
+            env_vars['SLACK_WEBHOOK_URL'] = out['slack'].get('webhookUrl', '')
+
+        if env_vars:
+            task_entry['env'] = env_vars
+
         # Update tasks.yaml
         tasks_file = CONFIG_PATH
         if os.path.exists(tasks_file):
