@@ -1,0 +1,31 @@
+services:
+  bot-factory:
+    build: .
+    container_name: bot-factory
+    restart: unless-stopped
+    ports:
+      - "5050:5000"
+    volumes:
+      # Task configuration
+      - ./config:/app/config
+      # Bot scripts (deployed bots go here)
+      - ./bots:/app/bots
+      # Persistent data (database)
+      - ./data:/app/data
+    environment:
+      # Optional: Enable basic auth
+      # AUTH_USER: admin
+      # AUTH_PASS: changeme
+      LOG_LEVEL: INFO
+      TZ: Europe/Berlin
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  default:
+    name: bot-network
+    driver: bridge

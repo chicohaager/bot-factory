@@ -1,0 +1,15 @@
+# Bot Factory Task Configuration
+# Copy this file to tasks.yaml and configure your tasks
+
+tasks:
+  # Example task configuration
+  # - name: example-bot
+  #   script: example-bot.py
+  #   description: "Example bot"
+  #   enabled: true
+  #   schedule: "0 8 * * *"  # Daily at 08:00
+  #   # Or use interval in seconds:
+  #   # interval: 3600  # Every hour
+  #   timeout: 300  # Max execution time in seconds
+  #   env:
+  #     CUSTOM_VAR: "value"
