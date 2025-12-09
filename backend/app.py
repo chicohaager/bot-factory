@@ -1124,9 +1124,17 @@ def zimaos_login() -> str:
         )
         resp.raise_for_status()
         data = resp.json()
-        _zimaos_token = data.get('data', {{}}).get('access_token') or data.get('access_token')
-        _zimaos_token_time = datetime.now()
-        logger.info("ZimaOS login successful")
+        # Token can be at data.token.access_token or data.access_token
+        token_data = data.get('data', {{}})
+        if isinstance(token_data, dict) and 'token' in token_data:
+            _zimaos_token = token_data.get('token', {{}}).get('access_token')
+        else:
+            _zimaos_token = token_data.get('access_token') or data.get('access_token')
+        if _zimaos_token:
+            _zimaos_token_time = datetime.now()
+            logger.info("ZimaOS login successful")
+        else:
+            logger.error(f"ZimaOS login response missing token. Response: {{data}}")
         return _zimaos_token
     except Exception as e:
         logger.error(f"ZimaOS login failed: {{e}}")
