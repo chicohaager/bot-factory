@@ -23,18 +23,17 @@ const botTemplates = [
       botDescription: 'Monitors ZimaOS system and sends status reports',
       dataSources: {
         rss: { enabled: false, feeds: [] },
-        api: {
-          enabled: true,
-          endpoints: [
-            { name: 'System Info', url: 'http://172.17.0.1/v2/zimaos/info', method: 'GET', headers: '{}', jsonPath: '' },
-            { name: 'CPU Usage', url: 'http://172.17.0.1/v1/sys/utilization', method: 'GET', headers: '{}', jsonPath: '$.cpu' },
-            { name: 'Memory Usage', url: 'http://172.17.0.1/v1/sys/utilization', method: 'GET', headers: '{}', jsonPath: '$.mem' },
-            { name: 'Docker Apps', url: 'http://172.17.0.1/v2/app_management/apps', method: 'GET', headers: '{}', jsonPath: '' }
-          ]
-        },
+        api: { enabled: false, endpoints: [] },
         scraping: { enabled: false, urls: [] },
         weather: { enabled: false, location: '', apiKey: '' },
-        homeassistant: { enabled: false, url: '', token: '', sensors: [] }
+        homeassistant: { enabled: false, url: '', token: '', sensors: [] },
+        zimaos: {
+          enabled: true,
+          url: 'http://172.17.0.1',
+          username: '',
+          password: '',
+          metrics: ['system', 'cpu', 'memory', 'apps']
+        }
       },
       processing: { aiRewrite: false, aiProvider: 'anthropic', aiApiKey: '', deduplication: false },
       outputs: {
@@ -914,7 +913,8 @@ function BotFactory({ onDeploy }) {
       api: { enabled: false, endpoints: [] },
       scraping: { enabled: false, urls: [] },
       weather: { enabled: false, location: '', apiKey: '' },
-      homeassistant: { enabled: false, url: '', token: '', sensors: [] }
+      homeassistant: { enabled: false, url: '', token: '', sensors: [] },
+      zimaos: { enabled: false, url: 'http://172.17.0.1', username: '', password: '', metrics: ['system', 'cpu', 'memory', 'apps'] }
     },
     processing: {
       aiRewrite: false,
@@ -1227,6 +1227,41 @@ function BotFactory({ onDeploy }) {
               <div className={`ml-4 mb-4 p-4 rounded-lg ${dark ? 'bg-gray-700' : 'bg-gray-50'}`}>
                 <Input label="URL" value={config.dataSources.homeassistant.url} onChange={(v) => updateConfig('dataSources.homeassistant.url', v)} placeholder="http://homeassistant.local:8123" />
                 <Input label="Access Token" value={config.dataSources.homeassistant.token} onChange={(v) => updateConfig('dataSources.homeassistant.token', v)} type="password" />
+              </div>
+            )}
+
+            <Toggle
+              label="ZimaOS"
+              checked={config.dataSources.zimaos?.enabled}
+              onChange={(v) => updateConfig('dataSources.zimaos.enabled', v)}
+              description="Monitor ZimaOS system (auto-login)"
+            />
+            {config.dataSources.zimaos?.enabled && (
+              <div className={`ml-4 mb-4 p-4 rounded-lg ${dark ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                <Input label="ZimaOS URL" value={config.dataSources.zimaos?.url || ''} onChange={(v) => updateConfig('dataSources.zimaos.url', v)} placeholder="http://172.17.0.1" />
+                <Input label="Username" value={config.dataSources.zimaos?.username || ''} onChange={(v) => updateConfig('dataSources.zimaos.username', v)} placeholder="ZimaOS username" />
+                <Input label="Password" value={config.dataSources.zimaos?.password || ''} onChange={(v) => updateConfig('dataSources.zimaos.password', v)} type="password" placeholder="ZimaOS password" />
+                <div className="mt-3">
+                  <label className={`block text-sm font-medium mb-2 ${dark ? 'text-gray-300' : ''}`}>Metrics to collect</label>
+                  <div className="flex flex-wrap gap-2">
+                    {['system', 'cpu', 'memory', 'apps', 'storage'].map(metric => (
+                      <label key={metric} className={`flex items-center gap-1 px-2 py-1 rounded ${dark ? 'bg-gray-600' : 'bg-gray-100'}`}>
+                        <input
+                          type="checkbox"
+                          checked={config.dataSources.zimaos?.metrics?.includes(metric)}
+                          onChange={(e) => {
+                            const current = config.dataSources.zimaos?.metrics || [];
+                            const updated = e.target.checked
+                              ? [...current, metric]
+                              : current.filter(m => m !== metric);
+                            updateConfig('dataSources.zimaos.metrics', updated);
+                          }}
+                        />
+                        <span className="text-sm capitalize">{metric}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
               </div>
             )}
           </div>

@@ -652,6 +652,12 @@ TZ={sched.get('timezone', 'Europe/Berlin')}
             env += f"\nHOMEASSISTANT_URL={ha.get('url', 'http://homeassistant.local:8123')}\n"
             env += f"HOMEASSISTANT_TOKEN={ha.get('token', '')}\n"
 
+        if ds.get('zimaos', {}).get('enabled'):
+            zima = ds['zimaos']
+            env += f"\nZIMAOS_URL={zima.get('url', 'http://172.17.0.1')}\n"
+            env += f"ZIMAOS_USER={zima.get('username', '')}\n"
+            env += f"ZIMAOS_PASS={zima.get('password', '')}\n"
+
         if out.get('email', {}).get('enabled'):
             e = out['email']
             env += f'''
@@ -1071,6 +1077,144 @@ def collect_homeassistant() -> List[Dict]:
 
 '''
 
+        # ZimaOS
+        if ds.get('zimaos', {}).get('enabled'):
+            metrics = ds['zimaos'].get('metrics', ['system', 'cpu', 'memory', 'apps'])
+            metrics_str = json.dumps(metrics)
+            code += f'''
+# ==================================================
+# ZimaOS API (with auto-login)
+# ==================================================
+
+ZIMAOS_URL = os.getenv('ZIMAOS_URL', '')
+ZIMAOS_USER = os.getenv('ZIMAOS_USER', '')
+ZIMAOS_PASS = os.getenv('ZIMAOS_PASS', '')
+ZIMAOS_METRICS = {metrics_str}
+
+_zimaos_token = None
+_zimaos_token_time = None
+
+def zimaos_login() -> str:
+    """Login to ZimaOS and get access token"""
+    global _zimaos_token, _zimaos_token_time
+
+    # Reuse token if less than 30 minutes old
+    if _zimaos_token and _zimaos_token_time:
+        from datetime import datetime, timedelta
+        if datetime.now() - _zimaos_token_time < timedelta(minutes=30):
+            return _zimaos_token
+
+    if not ZIMAOS_URL or not ZIMAOS_USER or not ZIMAOS_PASS:
+        logger.warning("ZimaOS credentials not configured")
+        return None
+
+    try:
+        resp = requests.post(
+            f"{{ZIMAOS_URL}}/v1/users/login",
+            json={{"username": ZIMAOS_USER, "password": ZIMAOS_PASS}},
+            timeout=REQUEST_TIMEOUT
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        _zimaos_token = data.get('data', {{}}).get('access_token') or data.get('access_token')
+        _zimaos_token_time = datetime.now()
+        logger.info("ZimaOS login successful")
+        return _zimaos_token
+    except Exception as e:
+        logger.error(f"ZimaOS login failed: {{e}}")
+        return None
+
+@retry_on_error()
+def collect_zimaos() -> List[Dict]:
+    """Collect system data from ZimaOS API"""
+    items = []
+    token = zimaos_login()
+    if not token:
+        return items
+
+    headers = {{"Authorization": f"Bearer {{token}}"}}
+
+    endpoints = {{
+        'system': '/v2/zimaos/info',
+        'cpu': '/v1/sys/utilization',
+        'memory': '/v1/sys/utilization',
+        'apps': '/v2/app_management/apps',
+        'storage': '/v1/storage/disks',
+    }}
+
+    for metric in ZIMAOS_METRICS:
+        if metric not in endpoints:
+            continue
+        try:
+            url = f"{{ZIMAOS_URL}}{{endpoints[metric]}}"
+            logger.info(f"Fetching ZimaOS {{metric}}: {{url}}")
+            resp = requests.get(url, headers=headers, timeout=REQUEST_TIMEOUT)
+            resp.raise_for_status()
+            data = resp.json()
+
+            # Extract relevant data based on metric type
+            if metric == 'cpu':
+                value = data.get('data', {{}}).get('cpu', data.get('cpu', {{}}))
+                item = {{
+                    'type': 'zimaos',
+                    'source': 'ZimaOS',
+                    'metric': 'cpu',
+                    'title': 'CPU Usage',
+                    'value': value.get('percent', value) if isinstance(value, dict) else value,
+                    'data': value,
+                }}
+            elif metric == 'memory':
+                value = data.get('data', {{}}).get('mem', data.get('mem', {{}}))
+                item = {{
+                    'type': 'zimaos',
+                    'source': 'ZimaOS',
+                    'metric': 'memory',
+                    'title': 'Memory Usage',
+                    'value': value.get('usedPercent', value) if isinstance(value, dict) else value,
+                    'data': value,
+                }}
+            elif metric == 'system':
+                item = {{
+                    'type': 'zimaos',
+                    'source': 'ZimaOS',
+                    'metric': 'system',
+                    'title': 'System Info',
+                    'data': data.get('data', data),
+                }}
+            elif metric == 'apps':
+                apps = data.get('data', data)
+                if isinstance(apps, list):
+                    item = {{
+                        'type': 'zimaos',
+                        'source': 'ZimaOS',
+                        'metric': 'apps',
+                        'title': f'Docker Apps ({{len(apps)}} running)',
+                        'count': len(apps),
+                        'apps': [a.get('name', 'unknown') for a in apps[:20]],
+                    }}
+                else:
+                    item = {{'type': 'zimaos', 'source': 'ZimaOS', 'metric': 'apps', 'data': apps}}
+            elif metric == 'storage':
+                item = {{
+                    'type': 'zimaos',
+                    'source': 'ZimaOS',
+                    'metric': 'storage',
+                    'title': 'Storage Info',
+                    'data': data.get('data', data),
+                }}
+            else:
+                item = {{'type': 'zimaos', 'source': 'ZimaOS', 'metric': metric, 'data': data}}
+
+            items.append(item)
+            logger.info(f"ZimaOS {{metric}}: collected")
+        except Exception as e:
+            logger.error(f"Error fetching ZimaOS {{metric}}: {{e}}")
+
+    logger.info(f"Collected {{len(items)}} ZimaOS items")
+    return items
+
+'''
+
         # AI Processing
         if proc.get('aiRewrite'):
             provider = proc.get('aiProvider', 'anthropic')
@@ -1420,6 +1564,8 @@ def send_email(subject: str, body: str) -> bool:
             collectors.append('items.extend(collect_weather())')
         if ds.get('homeassistant', {}).get('enabled'):
             collectors.append('items.extend(collect_homeassistant())')
+        if ds.get('zimaos', {}).get('enabled'):
+            collectors.append('items.extend(collect_zimaos())')
 
         collect_code = '\n    '.join(collectors) if collectors else '# No data sources configured'
 
