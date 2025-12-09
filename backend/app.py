@@ -1097,10 +1097,10 @@ _zimaos_token_time = None
 def zimaos_login() -> str:
     """Login to ZimaOS and get access token"""
     global _zimaos_token, _zimaos_token_time
+    from datetime import datetime, timedelta
 
     # Reuse token if less than 30 minutes old
     if _zimaos_token and _zimaos_token_time:
-        from datetime import datetime, timedelta
         if datetime.now() - _zimaos_token_time < timedelta(minutes=30):
             return _zimaos_token
 
