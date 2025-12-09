@@ -26,10 +26,10 @@ const botTemplates = [
         api: {
           enabled: true,
           endpoints: [
-            { name: 'System Info', url: 'http://localhost/v2/zimaos/info', method: 'GET', headers: '{}', jsonPath: '' },
-            { name: 'CPU Usage', url: 'http://localhost/v1/sys/utilization', method: 'GET', headers: '{}', jsonPath: '$.cpu' },
-            { name: 'Memory Usage', url: 'http://localhost/v1/sys/utilization', method: 'GET', headers: '{}', jsonPath: '$.mem' },
-            { name: 'Docker Apps', url: 'http://localhost/v2/app_management/apps', method: 'GET', headers: '{}', jsonPath: '' }
+            { name: 'System Info', url: 'http://172.17.0.1/v2/zimaos/info', method: 'GET', headers: '{}', jsonPath: '' },
+            { name: 'CPU Usage', url: 'http://172.17.0.1/v1/sys/utilization', method: 'GET', headers: '{}', jsonPath: '$.cpu' },
+            { name: 'Memory Usage', url: 'http://172.17.0.1/v1/sys/utilization', method: 'GET', headers: '{}', jsonPath: '$.mem' },
+            { name: 'Docker Apps', url: 'http://172.17.0.1/v2/app_management/apps', method: 'GET', headers: '{}', jsonPath: '' }
           ]
         },
         scraping: { enabled: false, urls: [] },
